@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_agent
 load_dotenv()
 
 class ResearchResponse(BaseModel):
@@ -32,12 +32,18 @@ prompt = ChatPromptTemplate.from_messages(
 ).partial(format_instructions=parser.get_format_instructions())
 
 
-agent =create_tool_calling_agent(
-    llm=llm,
-    prompt=prompt,
-    tools=[]
+# agent =create_tool_calling_agent(
+#     llm=llm,
+#     prompt=prompt,
+#     tools=[]
+# )
+agent = create_agent(
+    model="gemini-3.5-flash-lite",
+    tools=[],
+    system_prompt=prompt,
+    response_format=ResearchResponse
 )
 
-agent_executor= AgentExecutor(agent=agent,tools=[],verbose=True)
-raw_response =agent_executor.invoke({"query":"What is capital of India"})
-print(raw_response)
+
+result = agent.invoke({"messages": [{"role": "user", "content": "Paris Siant Germen"}]})
+print(result)
